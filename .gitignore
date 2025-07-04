@@ -1,0 +1,16 @@
+
+*.pyc
+__pycache__/
+
+
+newenv/
+
+local_settings.py
+
+
+/media/
+/static/
+
+
+
+*.log
