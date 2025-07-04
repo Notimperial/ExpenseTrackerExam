@@ -1,14 +1,12 @@
-# home/views.py
-from rest_framework import generics, status, viewsets,permissions
+
+from rest_framework import generics, status, viewsets, permissions
 from rest_framework.response import Response
 from django.contrib.auth.models import User
-
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from home.models import ExpenseIncome 
-from .serializers import ExpenseIncomeSerializer, UserRegistrationSerializer 
+from .serializers import ExpenseIncomeSerializer, UserRegistrationSerializer
 
 class UserRegistrationView(generics.CreateAPIView):
-    # API endpoint that will allows a new user to be registered.
-    # Requires Username, email, passwords
     queryset = User.objects.all()
     serializer_class = UserRegistrationSerializer
     permission_classes = [] 
@@ -22,21 +20,20 @@ class UserRegistrationView(generics.CreateAPIView):
             "username": user.username,
             "email": user.email
         }, status=status.HTTP_201_CREATED)
-    
 
 class ExpenseIncomeViewSet(viewsets.ModelViewSet):
-    # API endpoint that allows expense/income records to be viewed and edited.
-    # Requires JWT authentication for all operations
     serializer_class = ExpenseIncomeSerializer
+    queryset = ExpenseIncome.objects.all() 
+    
+    
+    authentication_classes = [JWTAuthentication]
     permission_classes = [permissions.IsAuthenticated]
+    
 
     def get_queryset(self):
-        
         if self.request.user.is_superuser:
             return ExpenseIncome.objects.all()
-        
         return ExpenseIncome.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        
         serializer.save(user=self.request.user)
